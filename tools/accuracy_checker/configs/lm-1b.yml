@@ -1,0 +1,33 @@
+models:
+  - name: lm-1b
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        model: public/lm-1b/FP32/lm-1b.xml
+        weights: public/lm-1b/FP32/lm-1b.bin
+        adapter:
+          type: lm_1b
+          softmax_out: softmax_out
+        inputs:
+          - name: char_embedding/Reshape/placeholder_port_0
+            type: INPUT
+          - name: Variable/read/placeholder_port_0
+            type: LSTM_INPUT
+            value: lstm/lstm_0/concat_2
+          - name: Variable_1/read/placeholder_port_0
+            type: LSTM_INPUT
+            value: lstm/lstm_1/concat_2
+    datasets:
+      - name: lm_1b_test
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_char_ids
+        annotation_conversion:
+          converter: lm_1b
+          input_file: public/lm-1b/lm-1b-dataset
+          vocab_file: public/lm-1b/lm-1b-vocab.txt
+          chars_encoding: True
+          max_word_length: 50
+        metrics:
+          - type: softmax_perplexity

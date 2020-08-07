@@ -24,6 +24,7 @@ from collections import OrderedDict
 import numpy as np
 import openvino.inference_engine as ie
 
+from .dlsdk_cpu_extension import CPUExtensionPathField
 from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
@@ -63,34 +64,6 @@ FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
-
-
-class CPUExtensionPathField(PathField):
-    def __init__(self, **kwargs):
-        super().__init__(is_directory=False, **kwargs)
-
-    def validate(self, entry, field_uri=None):
-        if entry is None:
-            return
-
-        field_uri = field_uri or self.field_uri
-        validation_entry = ''
-        try:
-            validation_entry = Path(entry)
-        except TypeError:
-            self.raise_error(entry, field_uri, "values is expected to be path-like")
-        is_directory = False
-        if validation_entry.parts[-1] == 'AUTO':
-            validation_entry = validation_entry.parent
-            is_directory = True
-        try:
-            get_path(validation_entry, is_directory)
-        except FileNotFoundError:
-            self.raise_error(validation_entry, field_uri, "path does not exist")
-        except NotADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is not a directory")
-        except IsADirectoryError:
-            self.raise_error(validation_entry, field_uri, "path is a directory, regular file expected")
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
@@ -281,6 +254,9 @@ class DLSDKLauncher(Launcher):
         self._do_reshape = False
         self._use_set_blob = False
         self._target_layout_mapping = {}
+        self._lstm_inputs = None
+        if '_list_lstm_inputs' in self.config:
+            self._configure_lstm_inputs()
 
     @property
     def device(self):
@@ -318,6 +294,8 @@ class DLSDKLauncher(Launcher):
         Returns:
             raw data from network.
         """
+        if self._lstm_inputs:
+            return self.predict_sequential(inputs, metadata)
         results = []
         for infer_inputs in inputs:
             if self._do_reshape:
@@ -347,6 +325,25 @@ class DLSDKLauncher(Launcher):
                 meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
         self._use_set_blob = False
+
+        return results
+
+    def predict_sequential(self, inputs, metadata=None, **kwargs):
+        lstm_inputs_feed = self._fill_lstm_inputs()
+        results = []
+        for feed_dict in inputs:
+            feed_dict.update(lstm_inputs_feed)
+            if self._do_reshape:
+                input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
+                self._reshape_input(input_shapes)
+            output_result = self.exec_network.infer(feed_dict)
+            lstm_inputs_feed = self._fill_lstm_inputs(output_result)
+            results.append(output_result)
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
+
+        self._do_reshape = False
 
         return results
 
@@ -869,8 +866,7 @@ class DLSDKLauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout, precision):
         def data_to_blob(layer_shape, data):
-            data_shape = np.shape(data)
-            if len(layer_shape) == 4:
+            def process_4d(data, data_shape, layer_shape):
                 if len(data_shape) == 5:
                     data = data[0]
 
@@ -879,12 +875,20 @@ class DLSDKLauncher(Launcher):
                         return np.resize(data, layer_shape)
                 return np.transpose(data, layout)
 
-            if len(layer_shape) == 2:
+            def process_2d(data, data_shape, layer_shape):
                 if len(data_shape) == 1:
                     return np.transpose([data])
                 if len(layout) == 2:
                     return np.transpose(data, layout)
+                return np.array(data)
 
+            data_shape = np.shape(data)
+            if len(layer_shape) == 4:
+                return process_4d(data, data_shape, layer_shape)
+            if len(layer_shape) == 2:
+                return process_2d(data, data_shape, layer_shape)
+            if len(layer_shape) == 1 and len(data_shape) == 2:
+                return np.array(data[0])
             if len(layer_shape) == 5 and len(layout) == 5:
                 return np.transpose(data, layout)
 
@@ -919,6 +923,23 @@ class DLSDKLauncher(Launcher):
                         self.exec_network.inputs[input_config['name']].precision = input_config['precision']
                     else:
                         self.exec_network.input_info[input_config['name']].precision = input_config['precision']
+
+    def _configure_lstm_inputs(self):
+        lstm_mapping = {}
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if input_config['type'] == 'LSTM_INPUT':
+                lstm_mapping[input_config['name']] = input_config['value']
+        self._lstm_inputs = lstm_mapping
+
+    def _fill_lstm_inputs(self, infer_outputs=None):
+        feed_dict = {}
+        for lstm_var, output_layer in self._lstm_inputs.items():
+            layer_shape = self.inputs[lstm_var].shape
+            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            feed_dict[lstm_var] = input_data
+
+        return feed_dict
 
     def _print_input_output_info(self):
         print_info('Input info:')

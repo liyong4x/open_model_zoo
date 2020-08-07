@@ -35,6 +35,24 @@ class LanguageModelingPrediction(LanguageModeling):
         super().__init__(identifier)
         self.logits = logits
 
+
+class LM1BRepresentation(BaseRepresentation):
+    pass
+
+
+class LM1BAnnotation(LM1BRepresentation):
+    def __init__(
+            self, identifier, input_ids, target_ids,
+            input_char_ids=None, input_words=None, target_words=None, metadata=None
+    ):
+        super().__init__(identifier, metadata)
+        self.input_ids = input_ids
+        self.target_ids = target_ids
+        self.input_words = input_words or []
+        self.target_words = target_words or []
+        self.input_char_ids = input_char_ids or []
+
+
 class QuestionAnswering(BaseRepresentation):
     def __init__(self, identifier=''):
         super().__init__(identifier)
