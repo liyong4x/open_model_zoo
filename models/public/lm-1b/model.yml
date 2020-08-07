@@ -92,8 +92,8 @@ model_optimizer_args:
   - --input_model=$dl_dir/lm-1b.pbtxt
   - --input_checkpoint=$dl_dir_ckpt
   - --input_model_is_text
-  - --input_shape=[50],[1,9216],[1,9216]
-  - --input=0:char_embedding/Reshape,Variable/read,Variable_1/read
+  - --input_shape=[50],[50],[1,9216],[1,9216]
+  - --input=char_embedding/EmbeddingLookupUnique/Unique:0,char_embedding/EmbeddingLookupUnique/Unique:1,Variable/read,Variable_1/read
   - --output=softmax_out,lstm/lstm_0/concat_2,lstm/lstm_1/concat_2
 framework: tf
 license: https://github.com/tensorflow/models/blob/master/research/lm_1b/README.md

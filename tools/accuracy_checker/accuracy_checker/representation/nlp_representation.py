@@ -43,7 +43,8 @@ class LM1BRepresentation(BaseRepresentation):
 class LM1BAnnotation(LM1BRepresentation):
     def __init__(
             self, identifier, input_ids, target_ids,
-            input_char_ids=None, input_words=None, target_words=None, metadata=None
+            input_char_ids=None, input_unique_y=None, input_unique_idx=None,
+            input_words=None, target_words=None, metadata=None
     ):
         super().__init__(identifier, metadata)
         self.input_ids = input_ids
@@ -51,6 +52,8 @@ class LM1BAnnotation(LM1BRepresentation):
         self.input_words = input_words or []
         self.target_words = target_words or []
         self.input_char_ids = input_char_ids or []
+        self.input_unique_y = input_unique_y or []
+        self.input_unique_idx = input_unique_idx or []
 
 
 class QuestionAnswering(BaseRepresentation):

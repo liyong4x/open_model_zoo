@@ -52,18 +52,36 @@ class LM1BDatasetConverter(BaseFormatConverter):
         sentences = read_txt(self.input_file)
         encoded_sentences = [self.encode_sentence(sentence) for sentence in sentences]
         encoded_by_chars_sentences = []
+        unique_y = []
+        unique_idx = []
         if self.chars_encoding:
             encoded_by_chars_sentences = [self.encode_by_chars(sentence_ids) for sentence_ids in encoded_sentences]
+        if self.chars_encoding:
+            for sentence_id, sentence in enumerate(encoded_sentences):
+                encoded_y = []
+                encoded_idx = []
+                encoded_by_chars_sentence = encoded_by_chars_sentences[sentence_id]
+                for word_idx in range(len(encoded_by_chars_sentence)):
+                    encoded_char = np.asarray(encoded_by_chars_sentence[word_idx])
+                    _y, _idx = self.encode_unique_by_chars(encoded_char)
+                    encoded_y.append(_y)
+                    encoded_idx.append(_idx)
+                unique_y.append(encoded_y)
+                unique_idx.append(encoded_idx)
         annotations = []
         num_iters = len(encoded_sentences)
+        unique_input_ids = list(range(self.multi_inputs))
         for sentence_id, sentence in enumerate(encoded_sentences):
             if progress_callback and sentence_id % progress_interval == 0:
                 progress_callback(sentence_id / num_iters * 100)
             targets = sentence[1:]
+            unique_input_identifier = ['sentence_{}_{}'.format(sentence_id, unique_ids) for unique_ids in unique_input_ids]
             annotations.append(
                 LM1BAnnotation(
-                    'sentence_{}'.format(sentence_id), sentence, targets,
-                    encoded_by_chars_sentences[sentence_id] if self.chars_encoding else None)
+                    MultiFramesInputIdentifier(unique_input_ids, unique_input_identifier), sentence, targets,
+                    encoded_by_chars_sentences[sentence_id] if self.chars_encoding else None,
+                    unique_y[sentence_id] if self.chars_encoding else None,
+                    unique_idx[sentence_id] if self.chars_encoding else None)
             )
 
         return ConverterReturn(
@@ -127,3 +145,29 @@ class LM1BDatasetConverter(BaseFormatConverter):
         for word_id in encoded_sentence[1:-1]:
             sentence_rep.append(self._word_to_char_ids[word_id])
         return sentence_rep
+
+    @staticmethod
+    def encode_unique_by_chars(char_input):
+        def _unique_(x):
+            y_ = []
+            idx_ = []
+            for xi in x:
+                if xi not in y_:
+                    y_.append(xi)
+            for xi in x:
+                for index, result in enumerate(xi == y_):
+                    if result:
+                        idx_.append(index)
+                        break
+            return y_, idx_
+
+        x = char_input.reshape(np.array([-1]))
+        y, idx = _unique_(x)
+        shape = len(x)
+        if len(y) >= shape:
+            return y, idx
+        _y = []
+        _y.extend(y)
+        for _ in range(shape-len(y)):
+            _y.append(y[len(y)-1])
+        return _y, idx

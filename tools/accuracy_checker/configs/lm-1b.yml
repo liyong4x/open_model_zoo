@@ -9,8 +9,12 @@ models:
           type: lm_1b
           softmax_out: softmax_out
         inputs:
-          - name: char_embedding/Reshape/placeholder_port_0
+          - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_0
             type: INPUT
+            value: 0
+          - name: char_embedding/EmbeddingLookupUnique/Unique/placeholder_out_port_1
+            type: INPUT
+            value: 1
           - name: Variable/read/placeholder_port_0
             type: LSTM_INPUT
             value: lstm/lstm_0/concat_2
@@ -22,12 +26,14 @@ models:
         reader:
           type: annotation_features_extractor
           features:
-            - input_char_ids
+            - input_unique_y
+            - input_unique_idx
         annotation_conversion:
           converter: lm_1b
           input_file: public/lm-1b/lm-1b-dataset
           vocab_file: public/lm-1b/lm-1b-vocab.txt
           chars_encoding: True
           max_word_length: 50
+          multi_inputs: 2
         metrics:
           - type: softmax_perplexity
