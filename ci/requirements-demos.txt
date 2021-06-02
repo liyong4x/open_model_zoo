@@ -50,7 +50,7 @@ tensorboard-plugin-wit==1.6.0.post3  # via tensorboard
 tensorboard==2.2.0        # via -r demos/python_demos/requirements.txt
 tensorboardx==2.0         # via -r demos/python_demos/requirements.txt
 tqdm==4.45.0              # via -r demos/python_demos/requirements.txt
-urllib3==1.25.8           # via requests
+urllib3==1.26.5           # via requests
 wcwidth==0.1.9            # via pytest
 werkzeug==1.0.1           # via tensorboard
 wheel==0.34.2             # via tensorboard
