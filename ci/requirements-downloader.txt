@@ -5,4 +5,4 @@ chardet==3.0.4            # via requests
 idna==2.9                 # via requests
 pyyaml==5.3.1             # via -r tools/downloader/requirements.in
 requests==2.23.0          # via -r tools/downloader/requirements.in
-urllib3==1.25.8           # via requests
+urllib3==1.26.5           # via requests
