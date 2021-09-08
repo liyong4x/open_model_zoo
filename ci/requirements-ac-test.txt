@@ -16,7 +16,7 @@ nibabel==3.0.2            # via -r tools/accuracy_checker/requirements.in
 numpy==1.17.5             # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, nibabel, pywavelets, scikit-learn, scipy
 packaging==20.3           # via pytest
 pathlib2==2.3.5           # via pytest
-pillow==7.1.1             # via -r tools/accuracy_checker/requirements.in, imageio, scikit-image
+pillow==8.3.2             # via -r tools/accuracy_checker/requirements.in, imageio, scikit-image
 pluggy==0.13.1            # via pytest
 py-cpuinfo==4.0.0         # via -r tools/accuracy_checker/requirements.in
 py==1.8.1                 # via pytest

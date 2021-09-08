@@ -21,7 +21,7 @@ networkx==2.4             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_
 numpy==1.18.2             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, h5py, keras-applications, keras-preprocessing, mxnet, onnx, opt-einsum, scipy, tensorboard, tensorflow, torch, torchvision
 onnx==1.6.0               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in
 opt-einsum==3.2.1         # via tensorflow
-pillow==7.1.1             # via torchvision
+pillow==8.3.2             # via torchvision
 protobuf==3.6.1           # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, onnx, tensorboard, tensorflow
 requests==2.23.0          # via mxnet
 scipy==1.4.1              # via -r tools/downloader/requirements-pytorch.in
