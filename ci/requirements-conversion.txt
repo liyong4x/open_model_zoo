@@ -22,7 +22,7 @@ numpy==1.18.2             # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_
 onnx==1.6.0               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, -r tools/downloader/requirements-caffe2.in, -r tools/downloader/requirements-pytorch.in
 opt-einsum==3.2.1         # via tensorflow
 pillow==7.1.1             # via torchvision
-protobuf==3.6.1           # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, onnx, tensorboard, tensorflow
+protobuf==3.18.3           # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, onnx, tensorboard, tensorflow
 requests==2.23.0          # via mxnet
 scipy==1.4.1              # via -r tools/downloader/requirements-pytorch.in
 six==1.14.0               # via absl-py, google-pasta, grpcio, h5py, keras-preprocessing, onnx, protobuf, tensorboard, tensorflow, test-generator, torchvision
