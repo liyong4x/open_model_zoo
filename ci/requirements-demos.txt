@@ -14,7 +14,7 @@ google-auth==1.14.0       # via google-auth-oauthlib, tensorboard
 grpcio==1.28.1            # via tensorboard
 idna==2.9                 # via requests
 importlib-metadata==1.6.0  # via pluggy, pytest
-joblib==0.14.1            # via scikit-learn
+joblib==1.2.0            # via scikit-learn
 kiwisolver==1.1.0         # via matplotlib
 markdown==3.2.1           # via tensorboard
 matplotlib==3.0.3         # via -r demos/python_demos/requirements.txt

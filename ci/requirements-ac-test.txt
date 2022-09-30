@@ -7,7 +7,7 @@ decorator==4.4.2          # via networkx
 editdistance==0.5.3       # via -r tools/accuracy_checker/requirements.in
 imageio==2.8.0            # via scikit-image
 importlib-metadata==1.6.0  # via pluggy, pytest
-joblib==0.14.1            # via scikit-learn
+joblib==1.2.0            # via scikit-learn
 kiwisolver==1.1.0         # via matplotlib
 matplotlib==3.0.3         # via scikit-image
 more-itertools==8.2.0     # via pytest
