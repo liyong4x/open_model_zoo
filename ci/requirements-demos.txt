@@ -53,7 +53,7 @@ tqdm==4.45.0              # via -r demos/python_demos/requirements.txt
 urllib3==1.25.8           # via requests
 wcwidth==0.1.9            # via pytest
 werkzeug==1.0.1           # via tensorboard
-wheel==0.34.2             # via tensorboard
+wheel==0.38.1             # via tensorboard
 xmltodict==0.12.0         # via motmetrics
 zipp==1.2.0               # via importlib-metadata
 
